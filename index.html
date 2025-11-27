@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EquiMatch - Horse Auction Widgets</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            text-align: center;
+        }
+        .widget-link {
+            display: block;
+            background: #667eea;
+            color: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .widget-link:hover {
+            background: #764ba2;
+            transform: translateY(-3px);
+        }
+        .iframe-code {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: left;
+            font-family: monospace;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏇 EquiMatch Widgets</h1>
+        <p>AI-powered horse matching system for auctions</p>
+        
+        <a href="add-horse.html" class="widget-link">
+            🎯 Open Add Horse Widget
+        </a>
+        
+        <a href="search-horses.html" class="widget-link">
+            🔍 Open Search Horses Widget
+        </a>
+        
+        <div class="iframe-code">
+            <h3>For your website:</h3>
+            <p>Add Horse Widget:</p>
+            <code>&lt;iframe src="add-horse.html" width="100%" height="800" style="border: none;"&gt;&lt;/iframe&gt;</code>
+            
+            <p style="margin-top: 15px;">Search Horses Widget:</p>
+            <code>&lt;iframe src="search-horses.html" width="100%" height="1000" style="border: none;"&gt;&lt;/iframe&gt;</code>
+        </div>
+    </div>
+</body>
+</html>
