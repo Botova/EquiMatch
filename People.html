@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Умный подбор лошадей — EquiMatch</title>
+<style>
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  color: white;
+}
+
+.header h1 {
+  font-size: 2.5em;
+  margin-bottom: 10px;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+}
+
+.header p {
+  font-size: 1.2em;
+  opacity: 0.9;
+}
+
+.search-panel {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  margin-bottom: 30px;
+}
+
+.section {
+  margin-bottom: 30px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border-left: 4px solid #667eea;
+}
+
+.section h3 {
+  color: #495057;
+  margin-bottom: 15px;
+  font-size: 1.3em;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.95em;
+}
+
+.form-group select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 2px solid #e9ecef;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.search-button {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  padding: 15px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  width: 100%;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.search-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.search-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.results {
+  background: white;
+  border-radius: 15px;
+  padding: 30px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+.results h2 {
+  color: #495057;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.no-results {
+  text-align: center;
+  padding: 40px;
+  color: #6c757d;
+}
+
+.no-results p {
+  margin-bottom: 10px;
+  font-size: 1.1em;
+}
+
+.horse-card {
+  border: 2px solid #e9ecef;
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.horse-card:hover {
+  border-color: #667eea;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.horse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.horse-name {
+  font-size: 1.4em;
+  font-weight: 700;
+  color: #495057;
+}
+
+.match-badge {
+  padding: 8px 16px;
+  border-radius: 20px;
+  color: white;
+  font-weight: 600;
+  text-align: center;
+  min-width: 120px;
+}
+
+.match-perfect {
+  background: linear-gradient(135deg, #00b09b 0%, #96c93d 100%);
+}
+
+.match-excellent {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.match-good {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.match-weak {
+  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.horse-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.detail-group h4 {
+  color: #6c757d;
+  font-size: 0.9em;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.detail-group p {
+  margin: 5px 0;
+  font-size: 0.95em;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 1.2em;
+  color: #667eea;
+}
+
+.weight-indicator {
+  font-size: 0.8em;
+  color: #6c757d;
+  font-weight: normal;
+  margin-left: 5px;
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 10px;
+  }
+  
+  .header h1 {
+    font-size: 2em;
+  }
+  
+  .search-panel, .results {
+    padding: 20px;
+  }
+  
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .horse-header {
+    flex-direction: column;
+    gap: 10px;
+    text-align: center;
+  }
+  
+  .horse-details {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏇 Умный подбор лошадей</h1>
+    <p>Найдите идеального партнёра по сложной системе соответствия</p>
+  </div>
+
+  <div class="search-panel">
+    <form id="buyerForm">
+      <div class="section">
+        <h3>👤 Ваш профиль и опыт</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Для кого ищете лошадь <span class="weight-indicator">(влияет на надёжность)</span></label>
+            <select id="self">
+              <option value="self">Для себя (self)</option>
+              <option value="child">Для ребёнка (child)</option>
+              <option value="student">Для студента (student)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Ваш внутренний профиль <span class="weight-indicator">(влияет на темперамент)</span></label>
+            <select id="inner_role">
+              <option value="intuitive">Интуитивный партнёр</option>
+              <option value="creator">Создатель</option>
+              <option value="warrior">Воин</option>
+              <option value="mentor">Наставник</option>
+              <option value="explorer">Исследователь</option>
+              <option value="listener">Слушатель</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Уровень опыта <span class="weight-indicator">(строгая проверка)</span></label>
+            <select id="experience_level">
+              <option value="1">1 - Начинающий (beginner)</option>
+              <option value="2">2 - Уверенный новичок (novice)</option>
+              <option value="3">3 - Опытный (intermediate)</option>
+              <option value="4">4 - Профессионал (professional)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>🎯 Цели и предпочтения</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Предпочтительная дисциплина <span class="weight-indicator">(вес: 70%)</span></label>
+            <select id="preferred_discipline">
+              <option value="dressage">Выездка (Dressage)</option>
+              <option value="jumping">Прыжки (Jumping)</option>
+              <option value="eventing">Троеборье (Eventing)</option>
+              <option value="liberty">Либерти (Liberty)</option>
+              <option value="hobby / allround">Хобби/универсал (Hobby/Allround)</option>
+              <option value="groundwork">Работа с земли (Groundwork)</option>
+              <option value="other">Другое (Other)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Стиль взаимодействия <span class="weight-indicator">(влияет на поведение)</span></label>
+            <select id="interaction_style">
+              <option value="calm_trust">Спокойствие и доверие</option>
+              <option value="structured">Структурированный</option>
+              <option value="competitive">Соревновательный</option>
+              <option value="emotional">Эмоциональный</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Цель покупки <span class="weight-indicator">(определяет требования)</span></label>
+            <select id="purchase_goal">
+              <option value="hobby">Хобби и отдых</option>
+              <option value="training">Обучение и тренировки</option>
+              <option value="sport">Спортивная карьера</option>
+              <option value="investment">Инвестиция</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <h3>💰 Бюджет и внешность</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Бюджет <span class="weight-indicator">(вес: 80%, строгая проверка)</span></label>
+            <select id="budget">
+              <option value="<10k">до 10,000 €</option>
+              <option value="10-20k">10,000 - 20,000 €</option>
+              <option value="20-35k">20,000 - 35,000 €</option>
+              <option value="35-50k">35,000 - 50,000 €</option>
+              <option value="50-70k">50,000 - 70,000 €</option>
+              <option value="70-100k">70,000 - 100,000 €</option>
+              <option value="100k+">свыше 100,000 €</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Предпочтительный цвет <span class="weight-indicator">(вес: 10%)</span></label>
+            <select id="horse_color">
+              <option value="any">Любой цвет</option>
+              <option value="black">Вороная (Black)</option>
+              <option value="bay">Гнедая (Bay)</option>
+              <option value="chestnut">Рыжая (Chestnut)</option>
+              <option value="grey">Серая (Grey)</option>
+              <option value="pinto">Пегая (Pinto)</option>
+              <option value="buckskin">Буланая (Buckskin)</option>
+              <option value="cremello">Кремовая (Cremello)</option>
+              <option value="palomino">Паломино (Palomino)</option>
+              <option value="roan">Чалая (Roan)</option>
+              <option value="other">Другая (Other)</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="search-button" id="searchBtn">
+        🔍 Найти подходящих лошадей
+      </button>
+    </form>
+  </div>
+
+  <div class="results" id="results">
+    <h2>Результаты подбора</h2>
+    <div class="no-results">
+      <p>Заполните форму и нажмите "Найти подходящих лошадей"</p>
+      <p>Система анализирует более 15 параметров совместимости</p>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+// Конфигурация Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyDiQkG24sfV4HivK8mvlOivQ9EblzUdJVY",
+  authDomain: "equimach2.firebaseapp.com",
+  projectId: "equimach2",
+  storageBucket: "equimach2.firebasestorage.app",
+  messagingSenderId: "491896102852",
+  appId: "1:491896102852:web:78438246ce6737e3f1ce91"
+};
+
+// Инициализация Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Система весов
+const weights = {
+  horse_age: 70,
+  horse_height: 40, 
+  horse_sex: 10,
+  breed_type: 25,
+  budget: 80,
+  primary_discipline: 70,
+  training_level: 100,
+  temperament_boldness: 60,
+  sensitivity_level: 60,
+  pressure_response: 55,
+  reliability: 70,
+  human_contact: 50,
+  social_behavior: 30,
+  jumping_ability: 60,
+  dressage_relevance: 60,
+  vet_status: 80,
+  coat_color: 10
+};
+
+// Матрицы совместимости
+const compatibilityMatrices = {
+  // 🧩 3.1. Строгая проверка опыта
+  checkExperienceCompatibility(buyerExp, horseTraining) {
+    const experienceMap = {
+      "1": ["green", "basic", "novice"],
+      "2": ["green", "basic", "novice", "amateur"],
+      "3": ["basic", "novice", "amateur", "competition"],
+      "4": ["green", "basic", "novice", "amateur", "competition", "FEI"]
+    };
+    return experienceMap[buyerExp]?.includes(horseTraining) ?? true;
+  },
+
+  // 🧩 3.2. Бюджет (строгая проверка)
+  checkBudgetCompatibility(buyerBudget, horseBudget) {
+    const budgetOrder = ["<10k", "10-20k", "20-35k", "35-50k", "50-70k", "70-100k", "100k+"];
+    if (!buyerBudget || !horseBudget) return true;
+    const buyerIndex = budgetOrder.indexOf(buyerBudget);
+    const horseIndex = budgetOrder.indexOf(horseBudget);
+    return horseIndex <= buyerIndex;
+  },
+
+  // 🧩 3.2. Модификаторы для target_subject
+  calculateTargetSubjectModifiers(targetSubject, horse) {
+    const modifiers = {
+      reliability: 1.0,
+      sensitivity_level: 1.0,
+      temperament_boldness: 1.0
+    };
+
+    if (targetSubject === 'child') {
+      if (horse.reliability === 'very_reliable') modifiers.reliability = 1.0;
+      else if (horse.reliability === 'mostly_predictable') modifiers.reliability = 0.7;
+      else modifiers.reliability = 0.0;
+
+      if (['shy', 'medium'].includes(horse.temperament_boldness)) {
+        modifiers.temperament_boldness = 1.0;
+      } else {
+        modifiers.temperament_boldness = 0.6;
+      }
+
+      if (horse.sensitivity_level === 'steady') modifiers.sensitivity_level = 1.0;
+      else modifiers.sensitivity_level = 0.4;
+
+    } else if (targetSubject === 'student') {
+      if (horse.reliability === 'unpredictable') modifiers.reliability = 0.0;
+    }
+
+    return modifiers;
+  },
+
+  // 🧩 3.3. Стиль взаимодействия
+  getInteractionStyleMatch(interactionStyle, horse) {
+    const styleProfiles = {
+      'calm_trust': {
+        preferred: ['steady', 'moderate', 'very_reliable', 'seeks_contact'],
+        weights: [0.3, 0.2, 0.3, 0.2]
+      },
+      'structured': {
+        preferred: ['reacts_softly', 'balanced', 'predictable', 'consistent'],
+        weights: [0.25, 0.25, 0.25, 0.25]
+      },
+      'competitive': {
+        preferred: ['bold', 'forward', 'high', 'elite', 'competition'],
+        weights: [0.2, 0.2, 0.2, 0.2, 0.2]
+      },
+      'emotional': {
+        preferred: ['sensitive', 'seeks_contact', 'intuitive', 'responsive'],
+        weights: [0.3, 0.2, 0.3, 0.2]
+      }
+    };
+
+    const profile = styleProfiles[interactionStyle];
+    if (!profile) return 1.0;
+
+    let matchScore = 0;
+    profile.preferred.forEach((trait, index) => {
+      if (Object.values(horse).includes(trait)) {
+        matchScore += profile.weights[index];
+      }
+    });
+
+    return Math.min(matchScore * 1.3, 1.0);
+  },
+
+  // 🧩 3.7. Совпадение дисциплин
+  disciplineMatch(buyerDiscipline, horseDiscipline) {
+    const disciplineGroups = {
+      'dressage': ['dressage', 'hobby / allround', 'liberty'],
+      'jumping': ['jumping', 'eventing'],
+      'eventing': ['eventing', 'jumping', 'dressage'],
+      'liberty': ['liberty', 'groundwork'],
+      'hobby / allround': ['hobby / allround', 'dressage', 'jumping', 'liberty'],
+      'groundwork': ['groundwork', 'liberty'],
+      'other': ['other']
+    };
+
+    if (buyerDiscipline === horseDiscipline) return 1.0;
+    
+    if (disciplineGroups[buyerDiscipline]?.includes(horseDiscipline)) {
+      return 0.7;
+    }
+    
+    return 0.3;
+  },
+
+  // 🧩 3.8. Совпадение цвета
+  colorMatch(buyerColor, horseColor) {
+    if (!buyerColor || buyerColor === 'any') return 1.0;
+    return buyerColor === horseColor ? 1.0 : 0.9;
+  }
+};
+
+// Функция для преобразования числовых значений в категориальные теги
+function convertHorseData(horse) {
+  // Преобразуем числовой возраст в категорию
+  let horse_age;
+  if (horse.age >= 3 && horse.age < 5) horse_age = '3–5';
+  else if (horse.age >= 5 && horse.age < 7) horse_age = '5–7';
+  else if (horse.age >= 7 && horse.age <= 10) horse_age = '7–10';
+  else if (horse.age > 10 && horse.age <= 14) horse_age = '10–14';
+  else if (horse.age > 14) horse_age = '14+';
+
+  // Преобразуем числовой рост в категорию
+  let horse_height;
+  if (horse.height < 158) horse_height = '<158';
+  else if (horse.height >= 158 && horse.height <= 165) horse_height = '158–165';
+  else if (horse.height > 165 && horse.height <= 170) horse_height = '165–170';
+  else if (horse.height > 170) horse_height = '170+';
+
+  // Создаем объект с правильными названиями полей
+  return {
+    ...horse,
+    // Физические параметры
+    horse_age: horse_age,
+    horse_height: horse_height,
+    horse_sex: horse.sex,
+    breed_type: horse.breed,
+    budget: horse.price, // price -> budget
+    coat_color: horse.color,
+    
+    // Дисциплины и подготовка
+    primary_discipline: horse.disciplines && horse.disciplines.length > 0 ? horse.disciplines[0] : 'other',
+    training_level: horse.experience, // experience -> training_level
+    
+    // Поведение и темперамент
+    temperament_boldness: horse.temperament, // temperament -> temperament_boldness
+    sensitivity_level: horse.sensitivity, // sensitivity -> sensitivity_level
+    pressure_response: horse.reaction, // reaction -> pressure_response
+    reliability: horse.reliability,
+    human_contact: horse.contact, // contact -> human_contact
+    social_behavior: horse.dominance, // dominance -> social_behavior
+    
+    // Атлетические характеристики
+    jumping_ability: horse.jumping_ability,
+    dressage_relevance: horse.dressage_potential, // dressage_potential -> dressage_relevance
+    
+    // Здоровье
+    vet_status: horse.vet_status
+  };
+}
+
+// Основная функция расчета соответствия
+function computeMatch(buyer, horse) {
+  // Конвертируем данные лошади в правильный формат
+  const convertedHorse = convertHorseData(horse);
+  
+  // 🧩 3.1. Строгая проверка уровня опыта
+  if (buyer.experience_level && convertedHorse.training_level) {
+    const isExpCompatible = compatibilityMatrices.checkExperienceCompatibility(
+      buyer.experience_level, 
+      convertedHorse.training_level
+    );
+    if (!isExpCompatible) {
+      console.log(`Лошадь ${horse.name} не подходит по уровню подготовки: ${convertedHorse.training_level} для опыта ${buyer.experience_level}`);
+      return 0;
+    }
+  }
+
+  // 🧩 3.2. Строгая проверка бюджета
+  if (buyer.budget && convertedHorse.budget) {
+    const isBudgetCompatible = compatibilityMatrices.checkBudgetCompatibility(
+      buyer.budget, 
+      convertedHorse.budget
+    );
+    if (!isBudgetCompatible) {
+      console.log(`Лошадь ${horse.name} не подходит по бюджету: ${convertedHorse.budget} при запросе ${buyer.budget}`);
+      return 0;
+    }
+  }
+
+  let totalScore = 0;
+  let totalWeight = 0;
+
+  // 🧩 3.2. Модификаторы для target_subject
+  const targetModifiers = compatibilityMatrices.calculateTargetSubjectModifiers(buyer.self, convertedHorse);
+
+  // Функция для добавления баллов с учетом модификаторов
+  const addCategoryScore = (category, buyerValue, horseValue, customMatchFn = null) => {
+    if (!buyerValue || !horseValue) return;
+
+    const weight = weights[category];
+    let match = 0;
+
+    if (customMatchFn) {
+      match = customMatchFn(buyerValue, horseValue);
+    } else {
+      match = (buyerValue === horseValue) ? 1.0 : 0.0;
+    }
+
+    // Применяем модификаторы target_subject
+    if (targetModifiers[category] !== undefined) {
+      match *= targetModifiers[category];
+    }
+
+    totalScore += match * weight;
+    totalWeight += weight;
+  };
+
+  // Расчет баллов по категориям
+  addCategoryScore('primary_discipline', buyer.preferred_discipline, convertedHorse.primary_discipline, 
+                   compatibilityMatrices.disciplineMatch);
+  
+  addCategoryScore('training_level', buyer.experience_level, convertedHorse.training_level);
+  
+  // Поведенческие характеристики
+  addCategoryScore('reliability', buyer.self, convertedHorse.reliability);
+  addCategoryScore('temperament_boldness', buyer.inner_role, convertedHorse.temperament_boldness);
+  addCategoryScore('sensitivity_level', buyer.inner_role, convertedHorse.sensitivity_level);
+  addCategoryScore('pressure_response', buyer.interaction_style, convertedHorse.pressure_response);
+  addCategoryScore('human_contact', buyer.self, convertedHorse.human_contact);
+  addCategoryScore('social_behavior', buyer.inner_role, convertedHorse.social_behavior);
+  
+  // Атлетические характеристики
+  addCategoryScore('jumping_ability', buyer.preferred_discipline, convertedHorse.jumping_ability);
+  addCategoryScore('dressage_relevance', buyer.preferred_discipline, convertedHorse.dressage_relevance);
+  
+  // Дополнительные параметры
+  addCategoryScore('vet_status', buyer.self, convertedHorse.vet_status);
+  addCategoryScore('coat_color', buyer.horse_color, convertedHorse.coat_color, compatibilityMatrices.colorMatch);
+  
+  // Бюджет (уже проверен строго)
+  if (buyer.budget && convertedHorse.budget) {
+    totalScore += 1.0 * weights.budget;
+    totalWeight += weights.budget;
+  }
+
+  if (totalWeight === 0) return 0;
+
+  // 🧩 3.3. Применение множителя стиля взаимодействия
+  let interactionMultiplier = 1.0;
+  if (buyer.interaction_style) {
+    interactionMultiplier = compatibilityMatrices.getInteractionStyleMatch(buyer.interaction_style, convertedHorse);
+  }
+
+  const basePercentage = (totalScore / totalWeight) * 100;
+  const finalPercentage = basePercentage * interactionMultiplier;
+
+  return Math.min(Math.round(finalPercentage), 100);
+}
+
+// Получение уровня соответствия
+function getMatchLevel(percentage) {
+  if (percentage >= 90) return { class: 'match-perfect', text: '💎 ИДЕАЛЬНЫЙ МАТЧ' };
+  if (percentage >= 75) return { class: 'match-excellent', text: '⭐ ОЧЕНЬ ХОРОШИЙ' };
+  if (percentage >= 60) return { class: 'match-good', text: '✅ ПОДХОДЯЩИЙ' };
+  return { class: 'match-weak', text: '⚡ СЛАБЫЙ МАТЧ' };
+}
+
+// Основная логика приложения
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('buyerForm');
+  const resultsDiv = document.getElementById('results');
+  const searchBtn = document.getElementById('searchBtn');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Показываем загрузку
+    searchBtn.disabled = true;
+    searchBtn.textContent = '🔄 Поиск...';
+    resultsDiv.innerHTML = '<div class="loading">Идёт поиск подходящих лошадей...</div>';
+
+    try {
+      // Получаем параметры покупателя
+      const buyer = {
+        self: document.getElementById('self').value,
+        inner_role: document.getElementById('inner_role').value,
+        experience_level: document.getElementById('experience_level').value,
+        preferred_discipline: document.getElementById('preferred_discipline').value,
+        interaction_style: document.getElementById('interaction_style').value,
+        purchase_goal: document.getElementById('purchase_goal').value,
+        horse_color: document.getElementById('horse_color').value,
+        budget: document.getElementById('budget').value
+      };
+
+      console.log('Параметры поиска:', buyer);
+
+      // Загружаем лошадей из Firebase
+      const querySnapshot = await getDocs(collection(db, "horses"));
+      const horses = [];
+      
+      querySnapshot.forEach((doc) => {
+        horses.push({ id: doc.id, ...doc.data() });
+      });
+
+      console.log(`Загружено ${horses.length} лошадей из базы данных`);
+
+      // Рассчитываем соответствие для каждой лошади
+      const matches = horses.map(horse => {
+        const score = computeMatch(buyer, horse);
+        console.log(`Лошадь ${horse.name}: ${score}%`, {
+          training_level: horse.experience,
+          budget: horse.price,
+          discipline: horse.disciplines && horse.disciplines[0]
+        });
+        return { ...horse, score };
+      })
+      .filter(horse => horse.score > 0) // Фильтруем только подходящих
+      .sort((a, b) => b.score - a.score); // Сортируем по убыванию соответствия
+
+      console.log(`Найдено ${matches.length} подходящих лошадей`);
+
+      // Отображаем результаты
+      if (matches.length === 0) {
+        resultsDiv.innerHTML = `
+          <div class="no-results">
+            <p>😔 Подходящие лошади не найдены</p>
+            <p>Попробуйте изменить критерии поиска, особенно бюджет или уровень подготовки</p>
+          </div>
+        `;
+      } else {
+        resultsDiv.innerHTML = `
+          <h2>Найдено лошадей: ${matches.length}</h2>
+          ${matches.map(horse => {
+            const matchLevel = getMatchLevel(horse.score);
+            const convertedHorse = convertHorseData(horse);
+            
+            return `
+              <div class="horse-card">
+                <div class="horse-header">
+                  <div class="horse-name">${horse.name || 'Без имени'}</div>
+                  <div class="match-badge ${matchLevel.class}">
+                    ${horse.score}% — ${matchLevel.text}
+                  </div>
+                </div>
+                <div class="horse-details">
+                  <div class="detail-group">
+                    <h4>Основные параметры</h4>
+                    <p><strong>Порода:</strong> ${horse.breed || 'не указана'}</p>
+                    <p><strong>Возраст:</strong> ${convertedHorse.horse_age || 'не указан'} (${horse.age} лет)</p>
+                    <p><strong>Рост:</strong> ${convertedHorse.horse_height || 'не указан'} (${horse.height} см)</p>
+                    <p><strong>Пол:</strong> ${horse.sex || 'не указан'}</p>
+                  </div>
+                  <div class="detail-group">
+                    <h4>Подготовка</h4>
+                    <p><strong>Дисциплина:</strong> ${convertedHorse.primary_discipline || 'не указана'}</p>
+                    <p><strong>Уровень:</strong> ${convertedHorse.training_level || 'не указан'}</p>
+                    <p><strong>Цена:</strong> ${convertedHorse.budget || 'не указана'}</p>
+                  </div>
+                  <div class="detail-group">
+                    <h4>Темперамент</h4>
+                    <p><strong>Характер:</strong> ${convertedHorse.temperament_boldness || 'не указан'}</p>
+                    <p><strong>Надёжность:</strong> ${convertedHorse.reliability || 'не указана'}</p>
+                    <p><strong>Чувствительность:</strong> ${convertedHorse.sensitivity_level || 'не указана'}</p>
+                    <p><strong>Контакт:</strong> ${convertedHorse.human_contact || 'не указан'}</p>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        `;
+      }
+
+    } catch (error) {
+      console.error('Ошибка при поиске:', error);
+      resultsDiv.innerHTML = `
+        <div class="no-results">
+          <p>❌ Произошла ошибка при поиске</p>
+          <p>Проверьте подключение к интернету и попробуйте снова</p>
+          <p style="font-size: 0.9em; margin-top: 10px;">Детали ошибки: ${error.message}</p>
+        </div>
+      `;
+    } finally {
+      // Восстанавливаем кнопку
+      searchBtn.disabled = false;
+      searchBtn.textContent = '🔍 Найти подходящих лошадей';
+    }
+  });
+});
+</script>
+</body>
+</html>

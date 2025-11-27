@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Добавление лошади — EquiMatch</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: #333;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 40px;
+      color: white;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 1.2em;
+      opacity: 0.9;
+    }
+
+    .form-panel {
+      background: white;
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      margin-bottom: 30px;
+    }
+
+    .section {
+      margin-bottom: 30px;
+      padding: 20px;
+      background: #f8f9fa;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+    }
+
+    .section h3 {
+      color: #495057;
+      margin-bottom: 15px;
+      font-size: 1.3em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #495057;
+      font-size: 0.95em;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 12px 15px;
+      border: 2px solid #e9ecef;
+      border-radius: 8px;
+      font-size: 16px;
+      background: white;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .checkbox-group {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: normal;
+      cursor: pointer;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 6px;
+      border: 1px solid #e9ecef;
+      transition: all 0.3s ease;
+    }
+
+    .checkbox-label:hover {
+      border-color: #667eea;
+      background: #f8f9ff;
+    }
+
+    .checkbox-label input {
+      margin: 0;
+      width: auto;
+    }
+
+    .submit-button {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      font-size: 18px;
+      font-weight: 600;
+      border-radius: 8px;
+      cursor: pointer;
+      width: 100%;
+      transition: all 0.3s ease;
+      margin-top: 10px;
+    }
+
+    .submit-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+
+    .submit-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-message {
+      text-align: center;
+      padding: 15px;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-weight: 600;
+    }
+
+    .success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .required::after {
+      content: " *";
+      color: #e74c3c;
+    }
+
+    .icon {
+      font-size: 1.2em;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .header h1 {
+        font-size: 2em;
+      }
+      
+      .form-panel {
+        padding: 20px;
+      }
+      
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .checkbox-group {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1>🏇 Добавление лошади</h1>
+    <p>Заполните анкету для добавления лошади в базу данных</p>
+  </div>
+
+  <div class="form-panel">
+    <form id="horseForm">
+      <!-- Основная информация -->
+      <div class="section">
+        <h3><span class="icon">📋</span> Основная информация</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Имя лошади</label>
+            <input type="text" id="name" required placeholder="Введите имя лошади">
+          </div>
+
+          <div class="form-group">
+            <label class="required">Возраст (годы)</label>
+            <input type="number" id="age" required min="1" max="30" placeholder="Возраст в годах">
+          </div>
+
+          <div class="form-group">
+            <label class="required">Рост (см)</label>
+            <input type="number" id="height" required min="100" max="200" placeholder="Рост в холке">
+          </div>
+
+          <div class="form-group">
+            <label class="required">Пол</label>
+            <select id="sex">
+              <option value="mare">Кобыла</option>
+              <option value="gelding">Мерин</option>
+              <option value="stallion">Жеребец</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Внешность и порода -->
+      <div class="section">
+        <h3><span class="icon">🎨</span> Внешность и порода</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Порода / тип</label>
+            <select id="breed">
+              <option value="warmblood">Warmblood (теплокровная)</option>
+              <option value="pony">Pony</option>
+              <option value="iberian">Iberian (PRE / Lusitano)</option>
+              <option value="thoroughbred">Thoroughbred</option>
+              <option value="arabian">Arabian</option>
+              <option value="draft-cross">Draft-cross</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Масть</label>
+            <select id="color">
+              <option value="black">Black</option>
+              <option value="bay">Bay</option>
+              <option value="chestnut">Chestnut</option>
+              <option value="grey">Grey</option>
+              <option value="pinto">Pinto</option>
+              <option value="buckskin">Buckskin</option>
+              <option value="cremello">Cremello</option>
+              <option value="palomino">Palomino</option>
+              <option value="roan">Roan</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Финансы -->
+      <div class="section">
+        <h3><span class="icon">💰</span> Финансы</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Бюджет</label>
+            <select id="price">
+              <option value="<10k"><10k</option>
+              <option value="10-20k">10-20k</option>
+              <option value="20-35k">20-35k</option>
+              <option value="35-50k">35-50k</option>
+              <option value="50-70k">50-70k</option>
+              <option value="70-100k">70-100k</option>
+              <option value="100k+">100k+</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Дисциплины и подготовка -->
+      <div class="section">
+        <h3><span class="icon">🏆</span> Дисциплины и подготовка</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="required">Основная дисциплина</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" value="dressage" class="discipline"> Dressage
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="jumping" class="discipline"> Jumping
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="eventing" class="discipline"> Eventing
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="liberty" class="discipline"> Liberty
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="hobby / allround" class="discipline"> Hobby / Allround
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="groundwork" class="discipline"> Groundwork
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" value="other" class="discipline"> Other
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="required">Уровень подготовки</label>
+            <select id="experience">
+              <option value="green">Green (минимально обученная)</option>
+              <option value="basic">Basic (база под седлом)</option>
+              <option value="novice">Novice</option>
+              <option value="amateur">Amateur</option>
+              <option value="competition">Competition</option>
+              <option value="FEI">FEI</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Темперамент и поведение -->
+      <div class="section">
+        <h3><span class="icon">💖</span> Темперамент и поведение</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Темперамент (смелость)</label>
+            <select id="temperament">
+              <option value="bold">Bold</option>
+              <option value="medium">Medium</option>
+              <option value="shy">Shy</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Чувствительность</label>
+            <select id="sensitivity">
+              <option value="sensitive">Sensitive</option>
+              <option value="moderate">Moderate</option>
+              <option value="steady">Steady</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Реакция на давление</label>
+            <select id="reaction">
+              <option value="quick">Reacts quickly</option>
+              <option value="soft">Reacts softly</option>
+              <option value="delayed">Delayed response</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Надёжность</label>
+            <select id="reliability">
+              <option value="very_reliable">Very reliable</option>
+              <option value="mostly_predictable">Mostly predictable</option>
+              <option value="unpredictable">Unpredictable</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Отношение к человеку</label>
+            <select id="contact">
+              <option value="seeks_contact">Seeks contact</option>
+              <option value="neutral">Neutral</option>
+              <option value="avoids_contact">Avoids contact</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Поведение в табуне</label>
+            <select id="dominance">
+              <option value="dominant">Dominant</option>
+              <option value="neutral">Neutral</option>
+              <option value="submissive">Submissive</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Спортивные характеристики -->
+      <div class="section">
+        <h3><span class="icon">⚡</span> Спортивные характеристики</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Способность к прыжкам</label>
+            <select id="jumping_ability">
+              <option value="low">Low</option>
+              <option value="medium">Medium</option>
+              <option value="high">High</option>
+              <option value="elite">Elite</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Потенциал по выездке</label>
+            <select id="dressage_potential">
+              <option value="basic">Basic</option>
+              <option value="good">Good</option>
+              <option value="expressive">Expressive</option>
+              <option value="exceptional">Exceptional</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Здоровье -->
+      <div class="section">
+        <h3><span class="icon">🏥</span> Здоровье</h3>
+        <div class="form-grid">
+          <div class="form-group">
+            <label>Ветеринарный статус</label>
+            <select id="vet_status">
+              <option value="clean">Clean</option>
+              <option value="minor_findings">Minor findings</option>
+              <option value="significant_findings">Significant findings</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="submit-button" id="submitBtn">
+        💾 Сохранить лошадь в базу
+      </button>
+
+      <div id="statusMessage"></div>
+    </form>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-app.js";
+import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/12.6.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyDiQkG24sfV4HivK8mvlOivQ9EblzUdJVY",
+  authDomain: "equimach2.firebaseapp.com",
+  projectId: "equimach2",
+  storageBucket: "equimach2.firebasestorage.app",
+  messagingSenderId: "491896102852",
+  appId: "1:491896102852:web:78438246ce6737e3f1ce91"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+window.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('horseForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const statusMessage = document.getElementById('statusMessage');
+
+  // Функция для показа статуса
+  function showStatus(message, type) {
+    statusMessage.innerHTML = `
+      <div class="status-message ${type}">
+        ${message}
+      </div>
+    `;
+    setTimeout(() => {
+      statusMessage.innerHTML = '';
+    }, 5000);
+  }
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    
+    // Показываем загрузку
+    submitBtn.disabled = true;
+    submitBtn.textContent = '🔄 Сохранение...';
+
+    const name = document.getElementById('name').value;
+    const age = parseInt(document.getElementById('age').value);
+    const height = parseInt(document.getElementById('height').value);
+    const sex = document.getElementById('sex').value;
+    const breed = document.getElementById('breed').value;
+    const color = document.getElementById('color').value;
+    const experience = document.getElementById('experience').value;
+    const temperament = document.getElementById('temperament').value;
+    const sensitivity = document.getElementById('sensitivity').value;
+    const reaction = document.getElementById('reaction').value;
+    const reliability = document.getElementById('reliability').value;
+    const contact = document.getElementById('contact').value;
+    const dominance = document.getElementById('dominance').value;
+    const jumping_ability = document.getElementById('jumping_ability').value;
+    const dressage_potential = document.getElementById('dressage_potential').value;
+    const vet_status = document.getElementById('vet_status').value;
+    const price = document.getElementById('price').value;
+    const disciplines = Array.from(document.querySelectorAll('.discipline:checked')).map(el => el.value);
+
+    // Проверяем, что выбрана хотя бы одна дисциплина
+    if (disciplines.length === 0) {
+      showStatus('❌ Пожалуйста, выберите хотя бы одну дисциплину', 'error');
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Сохранить лошадь в базу';
+      return;
+    }
+
+    const tags = [];
+    if(age >= 3 && age < 5) tags.push('3–5');
+    else if(age >= 5 && age < 7) tags.push('5–7');
+    else if(age >= 7 && age <= 10) tags.push('7–10');
+    else if(age > 10 && age <= 14) tags.push('10–14');
+    else if(age > 14) tags.push('14+');
+
+    if(height < 158) tags.push('<158');
+    else if(height >= 158 && height <= 165) tags.push('158–165');
+    else if(height > 165 && height <= 170) tags.push('165–170');
+    else if(height > 170) tags.push('170+');
+
+    tags.push(sex, breed, price, experience, temperament, sensitivity, reaction, reliability, contact, dominance, jumping_ability, dressage_potential, vet_status, ...disciplines);
+
+    const horseData = { 
+      name, age, height, sex, breed, color, experience, temperament, sensitivity, reaction, reliability,
+      contact, dominance, jumping_ability, dressage_potential, vet_status, price, disciplines, tags 
+    };
+
+    try {
+      await addDoc(collection(db, 'horses'), horseData);
+      showStatus('✅ Лошадь успешно сохранена в базе данных!', 'success');
+      form.reset();
+    } catch (err) {
+      console.error('Ошибка сохранения:', err);
+      showStatus('❌ Ошибка при сохранении. Проверьте консоль для деталей.', 'error');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = '💾 Сохранить лошадь в базу';
+    }
+  });
+
+  // Добавляем валидацию для числовых полей
+  document.getElementById('age').addEventListener('input', function(e) {
+    if (this.value < 1) this.value = 1;
+    if (this.value > 30) this.value = 30;
+  });
+
+  document.getElementById('height').addEventListener('input', function(e) {
+    if (this.value < 100) this.value = 100;
+    if (this.value > 200) this.value = 200;
+  });
+});
+</script>
+
+</body>
+</html>
